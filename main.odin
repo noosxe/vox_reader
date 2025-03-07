@@ -95,6 +95,20 @@ main :: proc() {
             os.exit(1)
         }
     }
+
+    chunk, err = read_chunk_header(file)
+
+    if chunk == "RGBA" {
+        palette, err := read_palette(file)
+        if err != nil {
+            fmt.eprintln(err)
+            os.exit(1)
+        }
+
+        for color in palette {
+            fmt.printf("%x\n", color)
+        }
+    }
 }
 
 read_chunk_header :: proc(file: os.Handle) -> (string, os.Error) {
@@ -138,4 +152,13 @@ read_xyzi :: proc(file: os.Handle, allocator := context.allocator) -> ([]XYZI, o
     fmt.printf("num voxels: %d\n", num_voxels)
 
     return voxels, nil
+}
+
+read_palette :: proc(file: os.Handle) -> (palette: [256]u32, err: os.Error) {
+    _, err = os.read_ptr(file, raw_data(&palette), 256 * size_of(u32))
+    if err != nil {
+        return
+    }
+
+    return
 }
